@@ -12,70 +12,78 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            background: #000; /* Чорний фон, поки вантажиться фото */
+            background: #f0f2f5; /* Світлий фон за замовчуванням */
             text-align: center;
             transition: background 0.5s ease;
             background-position: center;
-            background-size: cover;
+            background-size: cover; 
             background-repeat: no-repeat;
         }
         
-        /* Клас з горилою */
-        .bg-error {
-            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("горила.png");
+        /* Цей клас додається до BODY тільки при помилці (показує фото) */
+        body.bg-error {
+            /* Ваше фото */
+            background-image: url("горила.png");
         }
 
+        /* --- СТИЛЬ КАРТКИ ЗА ЗАМОВЧУВАННЯМ (ЗВИЧАЙНИЙ) --- */
         .card { 
-            /* 0.15 — це 15% білого, майже прозорий */ 
+            background: white;  /* Біла картка */
             padding: 2.5rem 2rem; 
-            border-radius: 25px; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
-            width: 85%; 
-            max-width: 380px;
-            
-            
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Гарна тінь */
+            width: 90%; 
+            max-width: 400px;
+            color: #333; /* Темний текст */
+            transition: all 0.3s ease; /* Плавна анімація зникнення */
         }
         
-        h2 { 
-            color: white; 
-            margin-top: 0; 
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        h2 { margin-top: 0; color: #333; }
+        .status { margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5; }
+        .error { color: #dc3545; font-weight: bold; }
+
+        /* --- СТИЛЬ КАРТКИ ПРИ ПОМИЛЦІ (ПРОЗОРИЙ) --- */
+        .card.transparent-mode {
+            background: transparent !important; /* Робимо прозорою */
+            box-shadow: none !important;        /* Прибираємо тінь блоку */
+            border: none !important;
         }
 
-        .status { 
-            margin-bottom: 25px; 
-            font-size: 1.1rem; 
-            line-height: 1.4;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        /* Коли картка прозора, змінюємо колір тексту на білий з тінню */
+        .card.transparent-mode h2,
+        .card.transparent-mode .status,
+        .card.transparent-mode .error,
+        .card.transparent-mode #debug {
+            color: white !important;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000; /* Чорна обводка */
         }
-
+        
+        /* Кнопка */
         .btn { 
             background: #007bff; 
             color: white; 
-            border: none; 
+            border: none;
             padding: 14px 28px; 
             border-radius: 12px; 
             cursor: pointer; 
             font-size: 1.1rem; 
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+            transition: transform 0.2s;
+        }
+        .btn:active { transform: scale(0.95); }
+
+        /* Рамка для кнопки тільки в режимі помилки, щоб її було видно на фото */
+        .card.transparent-mode .btn {
+            border: 2px solid white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
-        .error { 
-            color: #ff4d4d; /* Яскраво-червоний */
-            font-weight: bold; 
-            display: block;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
-        }
-
-        #debug { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 20px; }
+        #debug { font-size: 0.9rem; color: #888; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="card">
+    <div class="card" id="mainCard">
         <h2>Реєстрація</h2>
         <div id="status" class="status">Тисни кнопку, щоб ми перевірили, чи ти в будівлі.</div>
         <button id="startBtn" class="btn" onclick="checkLocation()">Почати реєстрацію</button>
@@ -83,17 +91,17 @@
     </div>
 
     <script>
-        // --- ТВОЇ НАЛАШТУВАННЯ ---
-        // ЗАМІНИ НА РЕАЛЬНІ КООРДИНАТИ!
-        const TARGET_LAT = 50.4501; 
-        const TARGET_LON = 30.5234; 
+        // --- НАЛАШТУВАННЯ ---
+        const TARGET_LAT = 50.4501; // ВАШІ КООРДИНАТИ
+        const TARGET_LON = 30.5234; // ВАШІ КООРДИНАТИ
         const RADIUS = 50;         
-        const FORM_URL = "https://forms.gle/RnV1HaUVH8ajW2RM8"; 
+        const FORM_URL = "https://forms.gle/8Pf4SvPnvmTe7X7VA"; 
         // -------------------------
 
         const statusText = document.getElementById('status');
         const debugText = document.getElementById('debug');
         const startBtn = document.getElementById('startBtn');
+        const mainCard = document.getElementById('mainCard'); // Отримуємо картку
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
@@ -108,10 +116,13 @@
         function checkLocation() {
             startBtn.style.display = 'none';
             statusText.innerText = "Шукаємо тебе в космосі...";
+            
+            // СКИДАННЯ СТИЛІВ (Повертаємо білу картку при новій спробі)
             document.body.classList.remove('bg-error');
+            mainCard.classList.remove('transparent-mode');
 
             if (!navigator.geolocation) {
-                statusText.innerHTML = "<span class='error'>Твій браузер застарів для GPS.</span>";
+                statusText.innerHTML = "<span class='error'>Ваш браузер не підтримує геолокацію.</span>";
                 return;
             }
 
@@ -127,14 +138,17 @@
                         statusText.innerText = "Ти на місці! Відкриваємо форму...";
                         window.location.href = FORM_URL;
                     } else {
-                        document.body.classList.add('bg-error');
-                        statusText.innerHTML = `Реєстрація тільки в адміні. Ти занадто далеко. <br><br>Відстань: ${Math.round(distance)}м.`;
+                        // АКТИВАЦІЯ РЕЖИМУ ПОМИЛКИ (Горила + Прозорість)
+                        document.body.classList.add('bg-error');     // Вмикаємо фон горили
+                        mainCard.classList.add('transparent-mode');  // Робимо картку прозорою
+                        
+                        statusText.innerHTML = `Реєстрація тільки в адміні. Ти занадто далеко.`;
                         startBtn.style.display = 'inline-block';
                         startBtn.innerText = "Спробувати ще раз";
                     }
                 },
                 (err) => {
-                    statusText.innerHTML = "<span class='error'>Доступ до GPS закрито.</span>Увімкни локацію в налаштуваннях.";
+                    statusText.innerHTML = "<span class='error'>Доступ до GPS відхилено.</span><br>Дозвольте доступ і спробуйте ще раз.";
                     startBtn.style.display = 'inline-block';
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
@@ -143,7 +157,3 @@
     </script>
 </body>
 </html>
-
-
-
-
