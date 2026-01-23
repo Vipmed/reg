@@ -12,7 +12,7 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            background: #f0f2f5; 
+            background: #000; /* Чорний фон, поки вантажиться фото */
             text-align: center;
             transition: background 0.5s ease;
             background-position: center;
@@ -20,59 +20,77 @@
             background-repeat: no-repeat;
         }
         
-        /* Клас, який додасть фото на фон при помилці */
+        /* Клас з горилою */
         .bg-error {
-            /* Замініть 'photo.jpg' на пряме посилання на ваше фото */
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("горила.png");
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("горила.png");
         }
 
         .card { 
-    /* rgba(255, 255, 255, 0.2) - де 0.2 це 20% видимості білого кольору */
-    background: rgba(255, 255, 255, 0.1); 
-    padding: 2rem; 
-    border-radius: 20px; 
-    box-shadow: 0 10px 25px rgba(0,0,0,0.3); 
-    width: 90%; 
-    max-width: 400px;
-    
-    /* Сильне розмиття фону за карткою для ефекту матового скла */
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px); /* для підтримки в Safari/iOS */
-    
-    border: 1px solid rgba(255, 255, 255, 0.3); /* тонка рамка для об'єму */
-    color: white; /* робимо основний текст білим для контрасту */
-}
-        h2 {
-    color: white;
-    margin-top: 0;
-}
+            /* 0.15 — це 15% білого, майже прозорий */
+            background: rgba(255, 255, 255, 0.15); 
+            padding: 2.5rem 2rem; 
+            border-radius: 25px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            width: 85%; 
+            max-width: 380px;
+            
+            /* Ефект розмиття фону */
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
         
+        h2 { 
+            color: white; 
+            margin-top: 0; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
         .status { 
-    margin-bottom: 20px; 
-    font-size: 1.1rem; 
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5); /* тінь під текстом для читабельності */
-}
-        .btn { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
+            margin-bottom: 25px; 
+            font-size: 1.1rem; 
+            line-height: 1.4;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        .btn { 
+            background: #007bff; 
+            color: white; 
+            border: none; 
+            padding: 14px 28px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
+        }
+
         .error { 
-    color: #ff4d4d; /* яскраво-червоний */
-    font-weight: bold; 
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-}
-        #debug { font-size: 0.8rem; color: #888; margin-top: 15px; }
+            color: #ff4d4d; /* Яскраво-червоний */
+            font-weight: bold; 
+            display: block;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+        }
+
+        #debug { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h2>Реєстрація</h2>
-        <div id="status" class="status">Будь ласка, натисніть кнопку нижче, щоб ми могли перевірити, чи ви в будівлі.</div>
+        <div id="status" class="status">Тисни кнопку, щоб ми перевірили, чи ти в будівлі.</div>
         <button id="startBtn" class="btn" onclick="checkLocation()">Почати реєстрацію</button>
         <div id="debug"></div>
     </div>
 
     <script>
-        // --- ВАШІ НАЛАШТУВАННЯ ---
-        const TARGET_LAT = 50.4501; // ВСТАВТЕ РЕАЛЬНУ ШИРОТУ (напр. 50.4501)
-        const TARGET_LON = 30.5234; // ВСТАВТЕ РЕАЛЬНУ ДОВГОТУ (напр. 30.5234)
+        // --- ТВОЇ НАЛАШТУВАННЯ ---
+        // ЗАМІНИ НА РЕАЛЬНІ КООРДИНАТИ!
+        const TARGET_LAT = 50.4501; 
+        const TARGET_LON = 30.5234; 
         const RADIUS = 50;         
         const FORM_URL = "https://forms.gle/RnV1HaUVH8ajW2RM8"; 
         // -------------------------
@@ -93,11 +111,11 @@
 
         function checkLocation() {
             startBtn.style.display = 'none';
-            statusText.innerText = "Отримуємо GPS-координати...";
-            document.body.classList.remove('bg-error'); // Скидаємо фон при новій спробі
+            statusText.innerText = "Шукаємо тебе в космосі...";
+            document.body.classList.remove('bg-error');
 
             if (!navigator.geolocation) {
-                statusText.innerHTML = "<span class='error'>Ваш браузер не підтримує геолокацію.</span>";
+                statusText.innerHTML = "<span class='error'>Твій браузер застарів для GPS.</span>";
                 return;
             }
 
@@ -110,21 +128,18 @@
                     debugText.innerText = `Відстань: ${Math.round(distance)} м.`;
 
                     if (distance <= RADIUS) {
-                        statusText.innerText = "Успішно! Перенаправляємо на форму...";
+                        statusText.innerText = "Ти на місці! Відкриваємо форму...";
                         window.location.href = FORM_URL;
                     } else {
-                        // Додаємо фото на фон
                         document.body.classList.add('bg-error');
-                        
-                        statusText.innerHTML = `<span class='error'>Реєстрація можлива лише в приміщенні адміну. Ви знаходитесь занадто далеко.</span><br>Відстань: ${Math.round(distance)}м. Для реєстрації підійдіть ближче.`;
+                        statusText.innerHTML = `<span class='error'>КУДИ ТИ ЛІЗЕШ?</span>Реєстрація тільки в адмінці. Ти занадто далеко. <br><br>Відстань: ${Math.round(distance)}м.`;
                         startBtn.style.display = 'inline-block';
                         startBtn.innerText = "Спробувати ще раз";
                     }
                 },
                 (err) => {
-                    statusText.innerHTML = "<span class='error'>Доступ до GPS відхилено.</span><br>Будь ласка, дозвольте доступ у налаштуваннях браузера.";
+                    statusText.innerHTML = "<span class='error'>Доступ до GPS закрито.</span>Увімкни локацію в налаштуваннях.";
                     startBtn.style.display = 'inline-block';
-                    console.error(err);
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
             );
@@ -132,4 +147,3 @@
     </script>
 </body>
 </html>
-
