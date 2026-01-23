@@ -5,8 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Реєстрація: Перевірка локації</title>
     <style>
-        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f2f5; text-align: center; }
-        .card { background: white; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 90%; max-width: 400px; }
+        body { 
+            font-family: -apple-system, sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background: #f0f2f5; 
+            text-align: center;
+            transition: background 0.5s ease;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        
+        /* Клас, який додасть фото на фон при помилці */
+        .bg-error {
+            /* Замініть 'photo.jpg' на пряме посилання на ваше фото */
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("горила.png");
+        }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 2rem; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 90%; 
+            max-width: 400px;
+            backdrop-filter: blur(5px);
+        }
+        
         .status { margin-bottom: 20px; font-size: 1.1rem; }
         .btn { background: #007bff; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
         .error { color: #dc3545; font-weight: bold; }
@@ -23,10 +52,10 @@
 
     <script>
         // --- ВАШІ НАЛАШТУВАННЯ ---
-        const TARGET_LAT = 149.55366561604496; // Замініть на реальну широту
-        const TARGET_LON = 250.610670873119407; // Замініть на реальну довготу
-        const RADIUS = 50;         // Радіус у метрах (краще ставити 150 для стабільності GPS)
-        const FORM_URL = "https://forms.gle/8Pf4SvPnvmTe7X7VA"; // ВАШЕ ПОСИЛАННЯ TALLY
+        const TARGET_LAT = 50.4501; // ВСТАВТЕ РЕАЛЬНУ ШИРОТУ (напр. 50.4501)
+        const TARGET_LON = 30.5234; // ВСТАВТЕ РЕАЛЬНУ ДОВГОТУ (напр. 30.5234)
+        const RADIUS = 50;         
+        const FORM_URL = "https://forms.gle/RnV1HaUVH8ajW2RM8"; 
         // -------------------------
 
         const statusText = document.getElementById('status');
@@ -46,6 +75,7 @@
         function checkLocation() {
             startBtn.style.display = 'none';
             statusText.innerText = "Отримуємо GPS-координати...";
+            document.body.classList.remove('bg-error'); // Скидаємо фон при новій спробі
 
             if (!navigator.geolocation) {
                 statusText.innerHTML = "<span class='error'>Ваш браузер не підтримує геолокацію.</span>";
@@ -64,7 +94,10 @@
                         statusText.innerText = "Успішно! Перенаправляємо на форму...";
                         window.location.href = FORM_URL;
                     } else {
-                        statusText.innerHTML = `<span class='error'>Ви за межами будівлі.</span><br>Відстань: ${Math.round(distance)}м. Для реєстрації підійдіть ближче.`;
+                        // Додаємо фото на фон
+                        document.body.classList.add('bg-error');
+                        
+                        statusText.innerHTML = `<span class='error'>Реєстрація можлива лише в приміщенні адміну. Ви знаходитесь занадто далеко.</span><br>Відстань: ${Math.round(distance)}м. Для реєстрації підійдіть ближче.`;
                         startBtn.style.display = 'inline-block';
                         startBtn.innerText = "Спробувати ще раз";
                     }
@@ -80,5 +113,3 @@
     </script>
 </body>
 </html>
-
-
