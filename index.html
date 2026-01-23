@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перевірка локації</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f4f9; color: #333; }
+        .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 300px; }
+        .error { color: #e74c3c; font-weight: bold; }
+    </script>
+</head>
+<body>
+    <div class="card" id="status-card">
+        <div id="loader">⏳ Перевіряємо, чи ви в будівлі...</div>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        // --- НАЛАШТУВАННЯ ---
+        const TARGET_LAT = 49.55366561604496; // Широта будівлі
+        const TARGET_LON = 25.610670873119407; // Довгота будівлі
+        const RADIUS_METERS = 50;  // Радіус допуску (напр. 100 метрів)
+        const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdBGqGzBwglO3SipcAnJLfbHGKZ2cwEzT85VFchptkZA41Gvw/viewform?usp=publish-editor"; // Посилання на вашу форму
+        // --------------------
+
+        function getDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Радіус Землі в метрах
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const dist = getDistance(pos.coords.latitude, pos.coords.longitude, TARGET_LAT, TARGET_LON);
+                
+                if (dist <= RADIUS_METERS) {
+                    // Користувач у будівлі - перекидаємо на форму
+                    window.location.href = FORM_URL;
+                } else {
+                    // Користувач за межами
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('message').innerHTML = `
+                        <p class="error">Доступ обмежено!</p>
+                        <p>Реєстрація можлива лише в приміщенні. Ви знаходитесь занадто далеко.</p>
+                    `;
+                }
+            },
+            (err) => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('message').innerHTML = `
+                    <p class="error">Помилка GPS</p>
+                    <p>Для реєстрації потрібно дозволити доступ до геопозиції.</p>
+                `;
+            },
+            { enableHighAccuracy: true }
+        );
+    </script>
+</body>
+</html>
