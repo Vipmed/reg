@@ -10,59 +10,66 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
+            /* min-height важливо для мобільних браузерів */
+            min-height: 100vh; 
             margin: 0; 
-            background: #f0f2f5; 
+            background-color: #f0f2f5; 
             text-align: center;
             transition: background 0.5s ease;
-            background-position: center;
-            background-size: cover; 
+            
+            /* НАЛАШТУВАННЯ ФОНУ */
+            background-position: center center; /* Центруємо картинку */
             background-repeat: no-repeat;
-            overflow: hidden; /* Щоб написи не розтягували екран */
+            
+            /* cover = заповнити весь екран (може обрізати краї) */
+            /* contain = показати всю картинку (можуть бути порожні смуги збоку) */
+            /* Спробуйте 'cover', якщо хочете гарний фон, або 'contain', якщо треба бачити весь текст гіфки */
+            background-size: cover; 
+            
+            /* Це виправляє глюк на iPhone, коли фон зникає */
+            background-attachment: scroll; 
+            overflow: hidden;
         }
         
-        /* ГІФКА НА ФОН (з'являється при помилці) */
+        /* ГІФКА ПРИ ПОМИЛЦІ */
         body.bg-error {
-            /* Замініть 'error-bg.gif' на назву вашого файлу */
+            /* УВАГА: Перевірте назву файлу буква в букву! (великі/малі літери важливі) */
             background-image: url("phatearl.gif");
+            
+            /* Якщо гіфка занадто світла/строката, додаємо затемнення поверх неї */
+            box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- СТИЛІ ДЛЯ ВЕЛИКИХ НАПИСІВ --- */
+        /* --- СТИЛІ ТЕКСТУ (МЕМ) --- */
         .meme-text {
-            display: none; /* За замовчуванням приховані */
+            display: none;
             position: fixed;
             width: 100%;
             text-align: center;
             color: white;
             font-weight: 900;
-            font-size: 3rem; /* Дуже великий текст */
+            font-size: clamp(2rem, 5vw, 4rem); /* Адаптивний розмір шрифту: від 2rem до 4rem */
             text-transform: uppercase;
-            font-family: 'Impact', sans-serif; /* Класичний шрифт мемів */
+            font-family: 'Impact', sans-serif;
             letter-spacing: 2px;
-            
-            /* Жирна чорна обводка тексту */
-            text-shadow: 
-                3px 3px 0 #000, 
-               -1px -1px 0 #000,  
-                1px -1px 0 #000,
-               -1px 1px 0 #000,
-                1px 1px 0 #000;
             z-index: 10;
-            pointer-events: none; /* Щоб крізь текст можна було клікати */
+            pointer-events: none;
+            
+            /* Обводка тексту, щоб читався на будь-якому фоні */
+            text-shadow: 
+                3px 3px 0 #000, -1px -1px 0 #000,  
+                1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
         }
 
         .text-top { top: 10%; }
         .text-bottom { bottom: 10%; }
 
-        /* Показуємо написи ТІЛЬКИ коли активний клас помилки */
-        body.bg-error .meme-text {
-            display: block;
-        }
+        body.bg-error .meme-text { display: block; }
 
         /* --- СТИЛЬ КАРТКИ --- */
         .card { 
             background: white; 
-            padding: 2.5rem 2rem; 
+            padding: 2rem; 
             border-radius: 20px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             width: 90%; 
@@ -74,28 +81,24 @@
         }
         
         h2 { margin-top: 0; color: #333; }
-        .status { margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5; }
+        .status { margin-bottom: 20px; font-size: 1.1rem; line-height: 1.4; }
         .error { color: #dc3545; font-weight: bold; }
 
-        /* --- КАРТКА ПРИ ПОМИЛЦІ --- */
+        /* ПРОЗОРИЙ РЕЖИМ */
         .card.transparent-mode {
             background: transparent !important;
             box-shadow: none !important;
             border: none !important;
         }
 
-        /* Змінюємо кольори тексту всередині картки при помилці */
-        .card.transparent-mode h2,
+        .card.transparent-mode h2 { display: none; }
+
         .card.transparent-mode .status,
         .card.transparent-mode .error,
         .card.transparent-mode #debug {
             color: white !important;
-            text-shadow: 2px 2px 0 #000; 
-        }
-        
-        /* Прибираємо заголовок "Реєстрація" при помилці, щоб не заважав мему */
-        .card.transparent-mode h2 {
-            display: none;
+            text-shadow: 2px 2px 0 #000;
+            font-weight: 600;
         }
 
         .btn { 
@@ -103,7 +106,7 @@
             color: white; 
             border: none;
             padding: 14px 28px; 
-            border-radius: 12px; 
+            border-radius: 30px; 
             cursor: pointer; 
             font-size: 1.1rem; 
             font-weight: bold;
@@ -114,15 +117,10 @@
         .card.transparent-mode .btn {
             border: 2px solid white;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            margin-top: 20px;
+            margin-top: 10px;
         }
 
         #debug { font-size: 0.9rem; color: #888; margin-top: 20px; }
-        
-        /* Адаптація для мобільних (щоб текст не був гігантським) */
-        @media (max-width: 400px) {
-            .meme-text { font-size: 2.5rem; }
-        }
     </style>
 </head>
 <body>
@@ -205,5 +203,6 @@
     </script>
 </body>
 </html>
+
 
 
