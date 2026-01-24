@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Реєстрація: Перевірка локації</title>
+    <title>Реєстрація</title>
     <style>
         body { 
             font-family: -apple-system, sans-serif; 
@@ -12,52 +12,92 @@
             align-items: center; 
             height: 100vh; 
             margin: 0; 
-            background: #f0f2f5; /* Світлий фон за замовчуванням */
+            background: #f0f2f5; 
             text-align: center;
             transition: background 0.5s ease;
             background-position: center;
             background-size: cover; 
             background-repeat: no-repeat;
+            overflow: hidden; /* Щоб написи не розтягували екран */
         }
         
-        /* Цей клас додається до BODY тільки при помилці (показує фото) */
+        /* ГІФКА НА ФОН (з'являється при помилці) */
         body.bg-error {
-            /* Ваше фото */
-            background-image: url("горила.png");
+            /* Замініть 'error-bg.gif' на назву вашого файлу */
+            background-video: url("phatearl.mp4");
         }
 
-        /* --- СТИЛЬ КАРТКИ ЗА ЗАМОВЧУВАННЯМ (ЗВИЧАЙНИЙ) --- */
+        /* --- СТИЛІ ДЛЯ ВЕЛИКИХ НАПИСІВ --- */
+        .meme-text {
+            display: none; /* За замовчуванням приховані */
+            position: fixed;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-weight: 900;
+            font-size: 3rem; /* Дуже великий текст */
+            text-transform: uppercase;
+            font-family: 'Impact', sans-serif; /* Класичний шрифт мемів */
+            letter-spacing: 2px;
+            
+            /* Жирна чорна обводка тексту */
+            text-shadow: 
+                3px 3px 0 #000, 
+               -1px -1px 0 #000,  
+                1px -1px 0 #000,
+               -1px 1px 0 #000,
+                1px 1px 0 #000;
+            z-index: 10;
+            pointer-events: none; /* Щоб крізь текст можна було клікати */
+        }
+
+        .text-top { top: 10%; }
+        .text-bottom { bottom: 10%; }
+
+        /* Показуємо написи ТІЛЬКИ коли активний клас помилки */
+        body.bg-error .meme-text {
+            display: block;
+        }
+
+        /* --- СТИЛЬ КАРТКИ --- */
         .card { 
-            background: white;  /* Біла картка */
+            background: white; 
             padding: 2.5rem 2rem; 
             border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); /* Гарна тінь */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
             width: 90%; 
             max-width: 400px;
-            color: #333; /* Темний текст */
-            transition: all 0.3s ease; /* Плавна анімація зникнення */
+            color: #333; 
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
         }
         
         h2 { margin-top: 0; color: #333; }
         .status { margin-bottom: 25px; font-size: 1.1rem; line-height: 1.5; }
         .error { color: #dc3545; font-weight: bold; }
 
-        /* --- СТИЛЬ КАРТКИ ПРИ ПОМИЛЦІ (ПРОЗОРИЙ) --- */
+        /* --- КАРТКА ПРИ ПОМИЛЦІ --- */
         .card.transparent-mode {
-            background: transparent !important; /* Робимо прозорою */
-            box-shadow: none !important;        /* Прибираємо тінь блоку */
+            background: transparent !important;
+            box-shadow: none !important;
             border: none !important;
         }
 
-        /* Коли картка прозора, змінюємо колір тексту на білий з тінню */
+        /* Змінюємо кольори тексту всередині картки при помилці */
         .card.transparent-mode h2,
         .card.transparent-mode .status,
         .card.transparent-mode .error,
         .card.transparent-mode #debug {
             color: white !important;
+            text-shadow: 2px 2px 0 #000; 
         }
         
-        /* Кнопка */
+        /* Прибираємо заголовок "Реєстрація" при помилці, щоб не заважав мему */
+        .card.transparent-mode h2 {
+            display: none;
+        }
+
         .btn { 
             background: #007bff; 
             color: white; 
@@ -70,37 +110,45 @@
             box-shadow: 0 4px 15px rgba(0,123,255,0.3);
             transition: transform 0.2s;
         }
-        .btn:active { transform: scale(0.95); }
-
-        /* Рамка для кнопки тільки в режимі помилки, щоб її було видно на фото */
+        
         .card.transparent-mode .btn {
             border: 2px solid white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            margin-top: 20px;
         }
 
         #debug { font-size: 0.9rem; color: #888; margin-top: 20px; }
+        
+        /* Адаптація для мобільних (щоб текст не був гігантським) */
+        @media (max-width: 400px) {
+            .meme-text { font-size: 2.5rem; }
+        }
     </style>
 </head>
 <body>
+
+    <div class="meme-text text-top">ТИ КУДИ ЛІЗЕШ?</div>
+    <div class="meme-text text-bottom">ТУЛИ В АДМІН</div>
+
     <div class="card" id="mainCard">
         <h2>Реєстрація</h2>
-        <div id="status" class="status">Тисни кнопку, щоб ми перевірили, чи ти в будівлі.</div>
-        <button id="startBtn" class="btn" onclick="checkLocation()">Почати реєстрацію</button>
+        <div id="status" class="status">Натисніть кнопку для перевірки локації</div>
+        <button id="startBtn" class="btn" onclick="checkLocation()">Я на місці</button>
         <div id="debug"></div>
     </div>
 
     <script>
         // --- НАЛАШТУВАННЯ ---
-        const TARGET_LAT = 50.4501; // ВАШІ КООРДИНАТИ
-        const TARGET_LON = 30.5234; // ВАШІ КООРДИНАТИ
+        const TARGET_LAT = 50.4501; // ВСТАВТЕ ВАШІ КООРДИНАТИ
+        const TARGET_LON = 30.5234; // ВСТАВТЕ ВАШІ КООРДИНАТИ
         const RADIUS = 50;         
-        const FORM_URL = "https://tally.so/r/zx7Zo0"; 
+        const FORM_URL = "https://forms.gle/8Pf4SvPnvmTe7X7VA"; 
         // -------------------------
 
         const statusText = document.getElementById('status');
         const debugText = document.getElementById('debug');
         const startBtn = document.getElementById('startBtn');
-        const mainCard = document.getElementById('mainCard'); // Отримуємо картку
+        const mainCard = document.getElementById('mainCard');
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
@@ -116,12 +164,12 @@
             startBtn.style.display = 'none';
             statusText.innerText = "Шукаємо тебе в космосі...";
             
-            // СКИДАННЯ СТИЛІВ (Повертаємо білу картку при новій спробі)
+            // СКИДАННЯ (повертаємо звичайний вигляд)
             document.body.classList.remove('bg-error');
             mainCard.classList.remove('transparent-mode');
 
             if (!navigator.geolocation) {
-                statusText.innerHTML = "<span class='error'>Ваш браузер не підтримує геолокацію.</span>";
+                statusText.innerHTML = "<span class='error'>GPS недоступний</span>";
                 return;
             }
 
@@ -137,17 +185,18 @@
                         statusText.innerText = "Ти на місці! Відкриваємо форму...";
                         window.location.href = FORM_URL;
                     } else {
-                        // АКТИВАЦІЯ РЕЖИМУ ПОМИЛКИ (Горила + Прозорість)
-                        document.body.classList.add('bg-error');     // Вмикаємо фон горили
-                        mainCard.classList.add('transparent-mode');  // Робимо картку прозорою
+                        // ВМИКАЄМО РЕЖИМ МЕМУ
+                        document.body.classList.add('bg-error');
+                        mainCard.classList.add('transparent-mode');
                         
-                        statusText.innerHTML = `Реєстрація тільки в адміні. Ти занадто далеко.`;
+                        // Текст помилки стає коротшим, бо є великі написи зверху/знизу
+                        statusText.innerHTML = `<span class='error'>GPS ВИЗНАЧЕНО НЕВІРНО</span><br>Відстань: ${Math.round(distance)}м.`;
                         startBtn.style.display = 'inline-block';
                         startBtn.innerText = "Спробувати ще раз";
                     }
                 },
                 (err) => {
-                    statusText.innerHTML = "<span class='error'>Доступ до GPS відхилено.</span><br>Дозвольте доступ і спробуйте ще раз.";
+                    statusText.innerHTML = "<span class='error'>Увімкни GPS!</span>";
                     startBtn.style.display = 'inline-block';
                 },
                 { enableHighAccuracy: true, timeout: 10000 }
@@ -156,5 +205,3 @@
     </script>
 </body>
 </html>
-
-
