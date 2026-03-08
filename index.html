@@ -3,38 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Вхід до системи</title>
+    <title>System Check</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: -apple-system, sans-serif; background: #000; }
-        #app { display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; color: white; transition: 0.5s; background-color: #f0f2f5; }
-        
-        /* Стан при помилці (Гіфка + Мем) */
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; background: #000; }
+        #app { display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; color: white; background-color: #f0f2f5; }
+        body.bg-error { background-image: url("горила.png"); background-size: cover; background-position: center; }
         body.bg-error #app { background: transparent !important; }
-        body.bg-error {
-            background-image: url("горила.png"); /* Переконайся, що назва файлу збігається */
-            background-size: cover;
-            background-position: center;
-        }
-
         .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 85%; max-width: 380px; color: #333; z-index: 5; }
-        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
-        
-        /* Текст мему */
-        .meme-text {
-            display: none; position: fixed; width: 100%; text-align: center; color: white; font-weight: 900; font-size: 2.8rem; font-family: Impact, sans-serif;
-            text-transform: uppercase; letter-spacing: 2px; z-index: 10; pointer-events: none;
-            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
-        }
-        .text-top { top: 10%; }
-        .text-bottom { bottom: 10%; }
+        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; }
+        .meme-text { display: none; position: fixed; width: 100%; text-align: center; color: white; font-weight: 900; font-size: 2.8rem; font-family: Impact; text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000; z-index: 10; text-transform: uppercase; }
+        .text-top { top: 10%; } .text-bottom { bottom: 10%; }
         body.bg-error .meme-text { display: block; }
-        
-        /* Прозорість карти при помилці */
-        body.bg-error .card { background: transparent !important; box-shadow: none !important; border: none !important; }
+        body.bg-error .card { background: transparent !important; box-shadow: none !important; color: white !important; }
         body.bg-error .card h2, body.bg-error .card p { color: white !important; text-shadow: 2px 2px 0 #000; }
-        body.bg-error .btn { border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-
-        /* Фрейм з формою */
         #formFrame { display: none; width: 100%; height: 100%; border: none; background: white; }
     </style>
 </head>
@@ -43,83 +24,83 @@
     <div id="app">
         <div class="meme-text text-top">ТИ КУДИ ЛІЗЕШ?</div>
         <div class="meme-text text-bottom">ТУЛИ В АДМІН</div>
-
-        <div class="card" id="mainContent">
-            <h2 id="title">Реєстрація</h2>
-            <p id="status">Доступ дозволено тільки зі смартфонів</p>
-            <button id="startBtn" class="btn" onclick="secureCheck()">Почати реєстрацію</button>
-            <div id="debug" style="margin-top:15px; font-size:0.8rem; color:#888;"></div>
+        <div class="card" id="c">
+            <h2 id="t">Реєстрація</h2>
+            <p id="s">Доступ тільки зі смартфонів</p>
+            <button class="btn" onclick="v()">Перевірити доступ</button>
         </div>
     </div>
-
-    <iframe id="formFrame" src=""></iframe>
+    <iframe id="f" src=""></iframe>
 
     <script>
-        // ЗАШИФРОВАНЕ ПОСИЛАННЯ НА ТВОЮ ФОРМУ TALLY
-        const _0x4f2 = "aHR0cHM6Ly90YWxseS5zby9yL3p4N1pvMA=="; 
-        
-        // ВСТАВ ТУТ СВОЇ КООРДИНАТИ БУДІВЛІ
-        const TARGET_LAT = 50.4501; 
-        const TARGET_LON = 30.5234; 
-        const RADIUS = 70;
+        // Обфусковані дані (Tally URL + Координати)
+        const _0x = {
+            u: "aHR0cHM6Ly90YWxseS5zby9yL3p4N1pvMA==",
+            la: 49.553613233957726, 
+            lo: 25.610704162907265,  
+            r: 30
+        };
 
-        // БЛОКУВАННЯ КОНСОЛІ (DevTools)
-        setInterval(function() { (function() {}.constructor("debugger")()); }, 100);
+        // 1. ПАСТКА ДЛЯ КОНСОЛІ: безкінечний дебаггер
+        (function() {
+            const block = function() {
+                setInterval(function() { debugger; }, 50);
+            };
+            try { block(); } catch (e) {}
+        })();
 
-        function secureCheck() {
-            const status = document.getElementById('status');
-            const btn = document.getElementById('startBtn');
-            const debug = document.getElementById('debug');
+        // 2. ОЧИЩЕННЯ КОНСОЛІ: щоб нічого не встигли прочитати
+        setInterval(() => {
+            console.clear();
+            console.log("%cSTOP!", "color:red;font-size:40px;font-weight:bold;");
+        }, 100);
 
-            // 1. ПЕРЕВІРКА НА МОБІЛЬНИЙ
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (!isMobile) {
-                status.innerHTML = "<b style='color:red'>ПОМИЛКА: Вхід тільки з телефону!</b>";
+        // 3. ПЕРЕВІРКА НА ВІДКРИТТЯ DEVTOOLS (через зміну розміру)
+        window.onresize = function() {
+            if ((window.outerHeight - window.innerHeight) > 200 || (window.outerWidth - window.innerWidth) > 200) {
+                document.body.innerHTML = "<h1>SYSTEM ERROR: DEVTOOLS DETECTED</h1>";
+            }
+        };
+
+        // 4. ЗАБОРОНА КЛАВІШ (F12, Ctrl+U, Ctrl+Shift+I)
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))))) {
+                return false;
+            }
+        };
+
+        function v() {
+            const s = document.getElementById('s');
+            const isM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            if (!isM) {
+                s.innerHTML = "<b style='color:red'>ВХІД ТІЛЬКИ З ТЕЛЕФОНУ!</b>";
                 return;
             }
 
-            btn.style.display = 'none';
-            status.innerText = "Зчитування геопозиції...";
+            s.innerText = "GPS...";
+            navigator.geolocation.getCurrentPosition((p) => {
+                const d = (function(l1, n1, l2, n2) {
+                    const R = 6371e3;
+                    const dL = (l2 - l1) * Math.PI / 180;
+                    const dN = (n2 - n1) * Math.PI / 180;
+                    const a = Math.sin(dL/2) * Math.sin(dL/2) + Math.cos(l1*Math.PI/180)*Math.cos(l2*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
+                    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                })(p.coords.latitude, p.coords.longitude, _0x.la, _0x.lo);
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    const uLat = pos.coords.latitude;
-                    const uLon = pos.coords.longitude;
-                    const dist = calculateDistance(uLat, uLon, TARGET_LAT, TARGET_LON);
-                    
-                    if (dist <= RADIUS) {
-                        // УСПІХ: Відкриваємо Tally всередині фрейму
-                        document.getElementById('app').style.display = 'none';
-                        const frame = document.getElementById('formFrame');
-                        frame.src = atob(_0x4f2); // Розшифровка посилання
-                        frame.style.display = 'block';
-                    } else {
-                        // МЕМ-РЕЖИМ (Помилка)
-                        document.body.classList.add('bg-error');
-                        document.getElementById('mainContent').classList.add('transparent-mode');
-                        status.innerHTML = "<b style='color:#ff4d4d'>ПОМИЛКА ДОСТУПУ</b><br>Відстань: " + Math.round(dist) + "м.";
-                        btn.style.display = 'inline-block';
-                        btn.innerText = "Спробувати ще раз";
-                        document.getElementById('title').style.display = 'none';
-                    }
-                },
-                (err) => { 
-                    status.innerHTML = "<b style='color:red'>Увімкни GPS в налаштуваннях браузера!</b>"; 
-                    btn.style.display = 'inline-block'; 
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                if (d <= _0x.r) {
+                    document.getElementById('app').style.display = 'none';
+                    const fr = document.getElementById('f');
+                    fr.src = atob(_0x.u);
+                    fr.style.display = 'block';
+                } else {
+                    document.body.classList.add('bg-error');
+                    document.getElementById('c').classList.add('transparent-mode');
+                    s.innerHTML = "<b>ПОМИЛКА: ЗАДАЛЕКО</b> (" + Math.round(d) + "м)";
+                    document.getElementById('t').style.display = 'none';
+                }
+            }, () => { s.innerText = "Увімкни GPS!"; }, { enableHighAccuracy: true });
         }
     </script>
 </body>
 </html>
-
-
