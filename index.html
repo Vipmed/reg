@@ -3,105 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>System Check</title>
+    <title>Система реєстрації</title>
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: sans-serif; background: #000; }
-        #app { display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; color: white; background-color: #f0f2f5; }
-        body.bg-error { background-image: url("горила.png"); background-size: cover; background-position: center; }
+        /* Базові налаштування екрана */
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; font-family: -apple-system, sans-serif; 
+            background: #f0f2f5; 
+        }
+
+        #app { 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; width: 100vw; text-align: center; 
+            transition: background 0.5s ease; 
+        }
+
+        /* МЕМ-РЕЖИМ (Фон) */
+        body.bg-error {
+            background-image: url("горила.png"); /* Змініть на .gif за потреби */
+            background-size: cover;
+            background-position: center;
+        }
         body.bg-error #app { background: transparent !important; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 85%; max-width: 380px; color: #333; z-index: 5; }
-        .btn { background: #007bff; color: white; border: none; padding: 15px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; }
-        .meme-text { display: none; position: fixed; width: 100%; text-align: center; color: white; font-weight: 900; font-size: 2.8rem; font-family: Impact; text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000; z-index: 10; text-transform: uppercase; }
-        .text-top { top: 10%; } .text-bottom { bottom: 10%; }
+
+        /* ТЕКСТ МЕМУ */
+        .meme-text {
+            display: none; position: fixed; width: 100%; text-align: center; 
+            color: white; font-weight: 900; font-size: 2.8rem; font-family: Impact, sans-serif;
+            text-transform: uppercase; z-index: 10; pointer-events: none;
+            text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+        }
+        .text-top { top: 10%; }
+        .text-bottom { bottom: 10%; }
         body.bg-error .meme-text { display: block; }
-        body.bg-error .card { background: transparent !important; box-shadow: none !important; color: white !important; }
+
+        /* КАРТКА */
+        .card { 
+            background: white; padding: 30px; border-radius: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 85%; 
+            max-width: 380px; color: #333; z-index: 5; transition: 0.3s;
+        }
+        
+        /* ПРОЗОРА КАРТКА ПРИ ПОМИЛЦІ */
+        body.bg-error .card { background: transparent !important; box-shadow: none !important; border: none !important; }
         body.bg-error .card h2, body.bg-error .card p { color: white !important; text-shadow: 2px 2px 0 #000; }
-        #formFrame { display: none; width: 100%; height: 100%; border: none; background: white; }
+        body.bg-error .card h2 { display: none; }
+
+        .btn { 
+            background: #007bff; color: white; border: none; padding: 15px 30px; 
+            border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; 
+        }
+        body.bg-error .btn { border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 20px; }
+
+        /* ПОВНОЕКРАННИЙ IFRAME */
+        #formFrame {
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100vw; height: 100vh; border: none; 
+            margin: 0; padding: 0; z-index: 9999; background: white;
+        }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body oncontextmenu="return false;"> <div class="meme-text text-top">ТИ КУДИ ЛІЗЕШ?</div>
+    <div class="meme-text text-bottom">ТУЛИ В АДМІН</div>
 
     <div id="app">
-        <div class="meme-text text-top">ТИ КУДИ ЛІЗЕШ?</div>
-        <div class="meme-text text-bottom">ТУЛИ В АДМІН</div>
-        <div class="card" id="c">
-            <h2 id="t">Реєстрація</h2>
-            <p id="s">Доступ тільки зі смартфонів</p>
-            <button class="btn" onclick="v()">Перевірити доступ</button>
+        <div class="card" id="mainCard">
+            <h2 id="title">Реєстрація</h2>
+            <p id="status">Доступ дозволено тільки зі смартфонів</p>
+            <button id="startBtn" class="btn" onclick="secureCheck()">Почати реєстрацію</button>
         </div>
     </div>
-    <iframe id="f" src=""></iframe>
+
+    <iframe id="formFrame" src=""></iframe>
 
     <script>
-        const _0x = {
+        const _0xDat = {
             u: "aHR0cHM6Ly90YWxseS5zby9yL3p4N1pvMA==",
-            la: 50.553613233957726, 
-            lo: 5.610704162907265,  
-            r: 30
+            la: 50.4501, 
+            lo: 30.5234, 
+            r: 70       
         };
 
-        // 1. ПАСТКА ДЛЯ КОНСОЛІ: безкінечний дебаггер
-        (function() {
-            const block = function() {
-                setInterval(function() { debugger; }, 50);
-            };
-            try { block(); } catch (e) {}
-        })();
-
-        // 2. ОЧИЩЕННЯ КОНСОЛІ: щоб нічого не встигли прочитати
-        setInterval(() => {
-            console.clear();
-            console.log("%cSTOP!", "color:red;font-size:40px;font-weight:bold;");
-        }, 100);
-
-        // 3. ПЕРЕВІРКА НА ВІДКРИТТЯ DEVTOOLS (через зміну розміру)
+        /* 1. ЗАХИСТ ВІД DEVTOOLS (F12) */
+        setInterval(function() { (function() {}.constructor("debugger")()); }, 50);
+        
         window.onresize = function() {
-            if ((window.outerHeight - window.innerHeight) > 200 || (window.outerWidth - window.innerWidth) > 200) {
-                document.body.innerHTML = "<h1>SYSTEM ERROR: DEVTOOLS DETECTED</h1>";
+            if ((window.outerHeight - window.innerHeight) > 150 || (window.outerWidth - window.innerWidth) > 150) {
+                document.body.innerHTML = "<div style='color:white;text-align:center;margin-top:20%;font-size:2rem;'>SYSTEM ERROR: DEVTOOLS DETECTED</div>";
             }
         };
 
-        // 4. ЗАБОРОНА КЛАВІШ (F12, Ctrl+U, Ctrl+Shift+I)
         document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && (e.keyCode == 85 || (e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))))) {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
                 return false;
             }
         };
 
-        function v() {
-            const s = document.getElementById('s');
-            const isM = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        /* 2. ГОЛОВНА ПЕРЕВІРКА */
+        function secureCheck() {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('startBtn');
 
-            if (!isM) {
-                s.innerHTML = "<b style='color:red'>ВХІД ТІЛЬКИ З ТЕЛЕФОНУ!</b>";
+            // Перевірка на мобільний
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (!isMobile) {
+                status.innerHTML = "<b style='color:red'>ПОМИЛКА: Тільки з мобільних пристроїв!</b>";
                 return;
             }
 
-            s.innerText = "GPS...";
-            navigator.geolocation.getCurrentPosition((p) => {
-                const d = (function(l1, n1, l2, n2) {
-                    const R = 6371e3;
-                    const dL = (l2 - l1) * Math.PI / 180;
-                    const dN = (n2 - n1) * Math.PI / 180;
-                    const a = Math.sin(dL/2) * Math.sin(dL/2) + Math.cos(l1*Math.PI/180)*Math.cos(l2*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
-                    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                })(p.coords.latitude, p.coords.longitude, _0x.la, _0x.lo);
+            btn.style.display = 'none';
+            status.innerText = "Зчитування GPS...";
 
-                if (d <= _0x.r) {
-                    document.getElementById('app').style.display = 'none';
-                    const fr = document.getElementById('f');
-                    fr.src = atob(_0x.u);
-                    fr.style.display = 'block';
-                } else {
-                    document.body.classList.add('bg-error');
-                    document.getElementById('c').classList.add('transparent-mode');
-                    s.innerHTML = "<b>ПОМИЛКА: ЗАДАЛЕКО</b> (" + Math.round(d) + "м)";
-                    document.getElementById('t').style.display = 'none';
-                }
-            }, () => { s.innerText = "Увімкни GPS!"; }, { enableHighAccuracy: true });
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const dist = (function(l1, n1, l2, n2) {
+                        const R = 6371e3;
+                        const dL = (l2 - l1) * Math.PI / 180;
+                        const dN = (n2 - n1) * Math.PI / 180;
+                        const a = Math.sin(dL/2) * Math.sin(dL/2) + Math.cos(l1*Math.PI/180)*Math.cos(l2*Math.PI/180)*Math.sin(dN/2)*Math.sin(dN/2);
+                        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    })(pos.coords.latitude, pos.coords.longitude, _0xDat.la, _0xDat.lo);
+                    
+                    if (dist <= _0xDat.r) {
+                        // УСПІХ: Повноцінний фрейм
+                        document.getElementById('app').style.display = 'none';
+                        const f = document.getElementById('formFrame');
+                        f.src = atob(_0xDat.u);
+                        f.style.display = 'block';
+                    } else {
+                        // ПОМИЛКА: Мем
+                        document.body.classList.add('bg-error');
+                        status.innerHTML = "<b style='color:#ff4d4d'>ПОМИЛКА ДОСТУПУ</b><br>Ти за межами будівлі (" + Math.round(dist) + "м).";
+                        btn.style.display = 'inline-block';
+                        btn.innerText = "Спробувати ще раз";
+                    }
+                },
+                (err) => { 
+                    status.innerHTML = "<b style='color:red'>Увімкни GPS в браузері!</b>"; 
+                    btn.style.display = 'inline-block'; 
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
         }
     </script>
 </body>
 </html>
-
-
