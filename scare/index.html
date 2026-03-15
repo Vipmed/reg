@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Системне оновлення...</title>
+    <style>
+        * { box-sizing: border-box; }
+        body, html { 
+            height: 100%; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #000; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* --- ЕКРАН ПЕРЕЗАПУСКУ --- */
+        #restart-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            background-color: #000;
+        }
+
+        .apple-logo {
+            width: 80px;
+            height: 80px;
+            background: white;
+            mask: url('https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg') no-repeat center;
+            -webkit-mask: url('https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg') no-repeat center;
+        }
+
+        .android-load {
+            color: white;
+            text-align: center;
+        }
+        .android-logo {
+            font-size: 2.5rem;
+            font-weight: 500;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+        .loading-bar {
+            width: 150px;
+            height: 3px;
+            background: #333;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .loading-bar::after {
+            content: '';
+            position: absolute;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            animation: androidProgress 2s infinite linear;
+        }
+        @keyframes androidProgress {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* --- ВІКНО ПОВІДОМЛЕННЯ --- */
+        #final-screen {
+            display: none;
+            height: 100%;
+            width: 100%;
+            background-color: #3c8ccf;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #message-box {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        h2 { color: #e74c3c; margin-top: 0; }
+        p { font-size: 1.15rem; color: #333; line-height: 1.6; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body onclick="activateAudio()">
+
+    <div id="restart-screen">
+        <div id="os-content"></div>
+    </div>
+
+    <div id="final-screen">
+        <div id="message-box">
+            <h2>Реєстрація закрита</h2>
+            <p>Реєстраційна форма доступна лише:<br>
+            <strong>з 9:00 до 10:00</strong>.</p>
+            <p style="font-size: 0.8rem; color: #aaa; margin-top: 20px;">Система відновлена. Спробуйте у робочий час.</p>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx;
+        let soundEnabled = false;
+
+        // Функція для створення звуку вібрації (низькочастотний гул)
+        function playVibrationSound() {
+            if (!soundEnabled) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'square'; 
+            osc.frequency.setValueAtTime(80, audioCtx.currentTime); // Низький "бррр"
+            
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4); // Тривалість 0.4 сек
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+            
+            // Реальна вібрація корпусу (працює на Android)
+            if ("vibrate" in navigator) {
+                navigator.vibrate([200, 100, 200]);
+            }
+        }
+
+        function activateAudio() {
+            soundEnabled = true;
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function init() {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            const startHour = 9;
+            const endHour = 10;
+            const formUrl = "https://vipmed.github.io/reg/";
+
+            // Перевірка часу
+            if (hour >= startHour && hour < endHour) {
+                window.location.replace(formUrl);
+                return;
+            }
+
+            // Визначення ОС
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const content = document.getElementById('os-content');
+
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                content.innerHTML = '<div class="apple-logo"></div>';
+            } else {
+                content.innerHTML = `
+                    <div class="android-load">
+                        <div class="android-logo">Google</div>
+                        <div class="loading-bar"></div>
+                    </div>`;
+            }
+
+            // Таймер 4 секунди
+            setTimeout(() => {
+                playVibrationSound(); // Звук та вібрація в момент перемикання
+                document.getElementById('restart-screen').style.display = 'none';
+                document.getElementById('final-screen').style.display = 'flex';
+                document.body.style.backgroundColor = '#3c8ccf';
+            }, 4000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
