@@ -3,170 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Доступ обмежено</title>
+    <title>Перевірка доступу</title>
     <style>
-        /* Базові стилі та центрування */
+        /* Базові стилі для адаптивності на весь екран */
+        * { box-sizing: border-box; }
+        
         body, html {
             height: 100%;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.5s ease, color 0.5s ease;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #3c8ccf; /* Твій колір фону */
+            color: #333;
             overflow: hidden;
-        }
-
-        /* "Похмурий" режим, коли зачинено */
-        body.closed-mode {
-            background-color: #121212;
-            color: #e0e0e0;
         }
 
         #message {
             text-align: center;
-            padding: 40px;
-            border-radius: 16px;
+            padding: 40px 30px;
+            border-radius: 24px;
             background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            max-width: 450px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
             width: 90%;
-            transition: all 0.5s ease;
+            max-width: 600px;
+            transition: all 0.3s ease;
         }
 
-        body.closed-mode #message {
-            background: #1e1e1e;
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-            border: 1px solid #333;
-        }
+        h2 { color: #e74c3c; margin-top: 0; font-size: 2rem; }
+        p { font-size: 1.15rem; line-height: 1.6; margin: 15px 0; }
 
-        h2 { color: #e74c3c; margin-top: 0; }
-        p { font-size: 1.1rem; line-height: 1.6; }
-
-        /* Анімація мигання червоним */
-        @keyframes blinkRed {
-            0% { color: #777; }
-            50% { color: #ff0000; text-shadow: 0 0 15px rgba(255, 0, 0, 0.7); }
-            100% { color: #777; }
-        }
-
-        .passive-aggressive-clock {
+        /* Горизонтальний контейнер для годинника */
+        .clock-row {
+            display: flex;
+            flex-direction: row; /* Все в один рядок */
+            justify-content: center;
+            align-items: center; /* Центрування центрів усіх елементів */
+            gap: 15px;
             margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px dashed #444;
+            font-family: monospace;
         }
 
-        .time-wrapper {
-            font-family: 'Courier New', monospace;
-            font-size: 1.4rem;
-            animation: blinkRed 1s infinite;
+        .time-label {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 5px;
         }
 
-        .seconds {
-            font-size: 4rem; /* ДУЖЕ великі секунди */
+        .time-main {
+            font-size: 2rem; /* Розмір для HH:MM */
+            color: #444;
+            font-weight: 600;
+        }
+
+        .time-seconds {
+            font-size: 4rem; /* Величезні секунди */
             font-weight: 900;
-            display: inline-block;
-            min-width: 80px;
+            color: #e74c3c;
             line-height: 1;
+            /* Анімація легкого пульсу */
+            animation: pulse 1s infinite;
         }
 
-        .subtext {
-            display: block;
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; transform: scale(1.02); }
+            100% { opacity: 1; }
+        }
+
+        .hint {
             font-size: 0.85rem;
-            color: #888;
-            font-style: italic;
-            margin-top: 15px;
-            line-height: 1.4;
-        }
-
-        .click-hint {
-            margin-top: 10px;
-            font-size: 0.7rem;
+            color: #999;
+            margin-top: 25px;
+            cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #555;
         }
     </style>
 </head>
 <body>
 
     <div id="message">
-        Зачекайте, ми перевіряємо, чи маєте ви право бути тут...
+        Зачекайте, перевіряємо час доступу...
     </div>
 
     <script>
-        // --- КОНФІГУРАЦІЯ ---
-        const START_HOUR = 9;
-        const END_HOUR = 10;
-        const FORM_URL = "https://vipmed.github.io/reg/"; // ЗАМІНІТЬ НА СВОЄ ПОСИЛАННЯ
-
         let audioCtx;
-        let soundEnabled = false;
+        let soundStarted = false;
 
-        // Функція генерації звуку "тік"
-        function playTick() {
-            if (!soundEnabled) return;
+        // "Важке" механічне клацання
+        function playHeavyTick() {
+            if (!soundStarted) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
-            osc.type = 'square'; 
-            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.type = 'square';
+            // Ще нижча частота для "важкості" (60 Гц)
+            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
             
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            // Короткий, але потужний імпульс
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+            osc.stop(audioCtx.currentTime + 0.12);
         }
 
-        function update() {
+        function checkAccess() {
             const now = new Date();
             const hour = now.getHours();
             const min = now.getMinutes().toString().padStart(2, '0');
             const sec = now.getSeconds().toString().padStart(2, '0');
 
-            if (hour >= START_HOUR && hour < END_HOUR) {
-                // ПЕРЕНАПРАВЛЕННЯ
-                window.location.replace(FORM_URL);
+            const startHour = 9;
+            const endHour = 10;
+            const formUrl = "https://vipmed.github.io/reg/";
+
+            if (hour >= startHour && hour < endHour) {
+                window.location.replace(formUrl);
             } else {
-                // ПАСИВНА АГРЕСІЯ
-                document.body.classList.add('closed-mode');
                 document.getElementById('message').innerHTML = `
-                    <h2>Реєстрація закрита.</h2>
-                    <p>Взагалі-то, зараз не робочий час. Спробуйте зайти між <b>${START_HOUR}:00</b> та <b>${END_HOUR}:00</b>.</p>
+                    <h2>Реєстрація закрита</h2>
+                    <p>Вибачте, але реєстраційна форма доступна лише у робочий час:<br>
+                    <strong>з ${startHour}:00 до ${endHour}:00</strong>.</p>
                     
-                    <div class="passive-aggressive-clock">
-                        <div class="time-wrapper">
-                            ${hour}:${min}:<span class="seconds">${sec}</span>
-                        </div>
-                        <span class="subtext">
-                            Секунди невблаганно йдуть, а форма все ще не працює. <br>
-                            Дивно, правда? Можливо, ще через пару годин очікування щось зміниться...
-                        </span>
-                        <div class="click-hint" id="hint">Клацніть будь-де для "атмосфери"</div>
+                    <div class="time-label">Зараз на годиннику:</div>
+                    <div class="clock-row">
+                        <div class="time-main">${hour}:${min}</div>
+                        <div class="time-seconds">${sec}</div>
                     </div>
+                    
+                    <div class="hint" id="audio-trigger">🔊 Увімкнути звук очікування</div>
                 `;
-                playTick();
+                playHeavyTick();
             }
         }
 
-        // Включення звуку після першої взаємодії
-        window.addEventListener('click', () => {
-            soundEnabled = true;
+        // Активація звуку
+        document.addEventListener('click', function(e) {
+            soundStarted = true;
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            const hint = document.getElementById('hint');
-            if (hint) hint.innerHTML = "Слухайте, як марнується ваш час...";
-        }, { once: true });
+            const hint = document.getElementById('audio-trigger');
+            if (hint) hint.style.visibility = 'hidden';
+        });
 
-        // Запуск
-        setInterval(update, 1000);
-        update();
+        setInterval(checkAccess, 1000);
+        checkAccess();
     </script>
 </body>
 </html>
