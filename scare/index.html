@@ -8,16 +8,16 @@
         * { box-sizing: border-box; }
         body, html { 
             height: 100%; margin: 0; padding: 0; 
-            background-color: #3c8ccf; 
+            background-color: #000; /* Відразу чорний фон */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden; cursor: pointer;
         }
 
-        /* --- ЕКРАН ПЕРЕЗАПУСКУ (На весь екран) --- */
+        /* --- ЕКРАН ПЕРЕЗАПУСКУ --- */
         #restart-screen {
             position: fixed; top: 0; left: 0; 
             width: 100vw; height: 100vh;
-            display: none; justify-content: center; align-items: center;
+            display: flex; justify-content: center; align-items: center;
             z-index: 9999; background-color: #000;
         }
 
@@ -57,7 +57,7 @@
         }
         .time-main { font-size: 2.2rem; font-weight: 600; }
         .time-seconds {
-            font-size: 6rem; font-weight: 900;
+            font-size: 4rem; font-weight: 900;
             display: inline-block; min-width: 85px;
             animation: fastZoom 1s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -68,19 +68,9 @@
             100% { transform: scale(1); opacity: 1; }
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        #start-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 10000; color: white; text-align: center;
-        }
     </style>
 </head>
-<body onclick="launchPrank()">
-
-    <div id="start-overlay">
-        <h2>Натисніть для перевірки статусу</h2>
-    </div>
+<body onclick="enableEffects()">
 
     <div id="restart-screen">
         <div id="os-content"></div>
@@ -101,59 +91,42 @@
 
     <script>
         let audioCtx;
-        let soundStarted = false;
+        let effectsEnabled = false;
         let lastSecond = -1;
 
-        function launchPrank() {
+        // 1. АКТИВАЦІЯ ПОВНОГО ЕКРАНУ ТА ЗВУКУ ПРИ ПЕРШОМУ ТОРКАННІ
+        function enableEffects() {
+            if (effectsEnabled) return;
+            effectsEnabled = true;
+
+            // Повний екран
             let elem = document.documentElement;
             if (elem.requestFullscreen) { elem.requestFullscreen(); }
-            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); } 
+            else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
 
-            soundStarted = true;
+            // Підготовка звуку
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            document.getElementById('start-overlay').style.display = 'none';
-            const restartScreen = document.getElementById('restart-screen');
-            restartScreen.style.display = 'flex';
-
-            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-            const content = document.getElementById('os-content');
-            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                content.innerHTML = '<div class="apple-logo"></div>';
-            } else {
-                content.innerHTML = `<div class="android-load"><div class="android-logo">Google</div><div class="loading-bar"></div></div>`;
-            }
-
-            setTimeout(() => {
-                playSystemSound(); 
-                restartScreen.style.display = 'none';
-                document.getElementById('final-screen').style.display = 'flex';
-                document.body.style.backgroundColor = '#3c8ccf';
-                setInterval(updateClock, 100); // Частіше оновлення для точності звуку
-            }, 10000);
         }
 
-        // Противний високий звук для секунд
+        // 2. ПРОТИВНИЙ ЗВУК
         function playAnnoyingTick() {
-            if (!soundStarted || !audioCtx) return;
+            if (!effectsEnabled || !audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-
-            osc.type = 'sawtooth'; // Пилкоподібна хвиля - звучить дуже різко
-            osc.frequency.setValueAtTime(2500, audioCtx.currentTime); // Висока частота
-            
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime); // Не занадто гучно, але противно
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(2500, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
-
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
             osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // Звук вібрації при переході
-        function playSystemSound() {
+        // 3. ЗВУК ВІБРАЦІЇ ПРИ ЗАПУСКУ
+        function playBootSound() {
+            if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square'; osc.frequency.setValueAtTime(80, audioCtx.currentTime);
@@ -173,19 +146,45 @@
 
             document.getElementById('time-h-m').innerHTML = `${h}:${m}`;
             
-            // Якщо секунда змінилася — граємо противний звук
             if (s !== lastSecond) {
                 lastSecond = s;
                 document.getElementById('time-s').innerHTML = s_str;
                 playAnnoyingTick();
-                
-                // Перезапуск анімації
                 const s_elem = document.getElementById('time-s');
                 s_elem.style.animation = 'none';
                 s_elem.offsetHeight; 
                 s_elem.style.animation = null;
             }
         }
+
+        function init() {
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour >= 9 && hour < 10) {
+                window.location.replace("https://vipmed.github.io/reg/");
+                return;
+            }
+
+            // Відразу визначаємо ОС і показуємо лого
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const content = document.getElementById('os-content');
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                content.innerHTML = '<div class="apple-logo"></div>';
+            } else {
+                content.innerHTML = `<div class="android-load"><div class="android-logo">Google</div><div class="loading-bar"></div></div>`;
+            }
+
+            // Через 4 секунди перемикаємо на годинник
+            setTimeout(() => {
+                if (effectsEnabled) playBootSound();
+                document.getElementById('restart-screen').style.display = 'none';
+                document.getElementById('final-screen').style.display = 'flex';
+                document.body.style.backgroundColor = '#3c8ccf';
+                setInterval(updateClock, 100);
+            }, 10000); // 4 секунди завантаження
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
