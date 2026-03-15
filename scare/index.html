@@ -113,7 +113,7 @@
             const s = now.getSeconds();
             const s_str = s.toString().padStart(2, '0');
 
-            document.getElementById('time-h-m').innerHTML = `${h}:${m}`;
+            document.getElementById('time-h-m').innerHTML = `${h}:${m}:`;
             
             if (s !== lastSecond) {
                 lastSecond = s;
