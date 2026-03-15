@@ -59,8 +59,8 @@
 
         /* Секунди: тільки пульсація розміру, без неону */
         .time-seconds {
-            display: inline-block; /* Важливо для коректної анімації scale */
-            font-size: 5rem; 
+            display: inline-block;
+            font-size: 4rem; 
             font-weight: 900;
             color: #e74c3c;
             line-height: 1;
@@ -95,18 +95,21 @@
 
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
+            const now = audioCtx.currentTime;
 
+            // Налаштування різкого "лазерного" звуку
             osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(260, audioCtx.currentTime);
-            
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+            osc.frequency.setValueAtTime(3500, now); // Починаємо з високої частоти
+            osc.frequency.exponentialRampToValueAtTime(60, now + 0.15); // Стрімко падаємо вниз
+
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15); // Швидке затухання
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
 
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.12);
+            osc.stop(now + 0.15);
         }
 
         function startAudio() {
