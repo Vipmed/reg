@@ -18,6 +18,7 @@
             background-color: #3c8ccf; /* Твій колір фону */
             color: #333;
             overflow: hidden;
+            cursor: pointer; /* Щоб було зрозуміло, що можна клікнути */
         }
 
         #message {
@@ -37,12 +38,22 @@
         /* Горизонтальний контейнер для годинника */
         .clock-row {
             display: flex;
-            flex-direction: row; /* Все в один рядок */
+            flex-direction: row; 
             justify-content: center;
-            align-items: center; /* Центрування центрів усіх елементів */
+            align-items: center; 
             gap: 15px;
             margin-top: 25px;
             font-family: monospace;
+            /* ЗМІНА: Повне світіння блоку */
+            padding: 10px;
+            border-radius: 15px;
+            animation: glowEffect 1.5s infinite alternate;
+        }
+
+        /* Анімація світіння */
+        @keyframes glowEffect {
+            from { box-shadow: 0 0 10px rgba(231, 76, 60, 0.2); }
+            to { box-shadow: 0 0 30px rgba(231, 76, 60, 0.6); }
         }
 
         .time-label {
@@ -52,17 +63,16 @@
         }
 
         .time-main {
-            font-size: 2rem; /* Розмір для HH:MM */
+            font-size: 2rem; 
             color: #444;
             font-weight: 600;
         }
 
         .time-seconds {
-            font-size: 4rem; /* Величезні секунди */
+            font-size: 4rem; 
             font-weight: 900;
             color: #e74c3c;
             line-height: 1;
-            /* Анімація легкого пульсу */
             animation: pulse 1s infinite;
         }
 
@@ -71,18 +81,9 @@
             50% { opacity: 0.7; transform: scale(1.02); }
             100% { opacity: 1; }
         }
-
-        .hint {
-            font-size: 0.85rem;
-            color: #999;
-            margin-top: 25px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
     </style>
 </head>
-<body>
+<body onclick="soundStarted = true; if (audioCtx) audioCtx.resume();">
 
     <div id="message">
         Зачекайте, перевіряємо час доступу...
@@ -92,7 +93,6 @@
         let audioCtx;
         let soundStarted = false;
 
-        // "Важке" механічне клацання
         function playHeavyTick() {
             if (!soundStarted) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -101,11 +101,9 @@
             const gain = audioCtx.createGain();
 
             osc.type = 'square';
-            // Ще нижча частота для "важкості" (60 Гц)
-            osc.frequency.setValueAtTime(60, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(160, audioCtx.currentTime);
             
             gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            // Короткий, але потужний імпульс
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
 
             osc.connect(gain);
@@ -130,7 +128,7 @@
             } else {
                 document.getElementById('message').innerHTML = `
                     <h2>Реєстрація закрита</h2>
-                    <p>Вибачте, але реєстраційна форма доступна лише у робочий час:<br>
+                    <p>Реєстраційна форма доступна лише:<br>
                     <strong>з ${startHour}:00 до ${endHour}:00</strong>.</p>
                     
                     <div class="time-label">Зараз на годиннику:</div>
@@ -138,20 +136,10 @@
                         <div class="time-main">${hour}:${min}</div>
                         <div class="time-seconds">${sec}</div>
                     </div>
-                    
-                    <div class="hint" id="audio-trigger">🔊 Увімкнути звук очікування</div>
                 `;
                 playHeavyTick();
             }
         }
-
-        // Активація звуку
-        document.addEventListener('click', function(e) {
-            soundStarted = true;
-            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            const hint = document.getElementById('audio-trigger');
-            if (hint) hint.style.visibility = 'hidden';
-        });
 
         setInterval(checkAccess, 1000);
         checkAccess();
