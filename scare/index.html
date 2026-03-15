@@ -8,7 +8,7 @@
         * { box-sizing: border-box; }
         body, html { 
             height: 100%; margin: 0; padding: 0; 
-            background-color: #000; /* Відразу чорний фон */
+            background-color: #000; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden; cursor: pointer;
         }
@@ -21,20 +21,28 @@
             z-index: 9999; background-color: #000;
         }
 
-        .apple-logo {
-            width: 80px; height: 80px; background: white;
-            mask: url('https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg') no-repeat center;
-            -webkit-mask: url('https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg') no-repeat center;
+        /* Анімація для Apple: Плавне пульсування логотипу */
+        .apple-boot {
+            width: 80px;
+            filter: brightness(0) invert(1);
+            animation: applePulse 3s infinite ease-in-out;
         }
 
-        .android-load { color: white; text-align: center; }
-        .android-logo { font-size: 2.5rem; font-weight: 500; margin-bottom: 10px; }
-        .loading-bar { width: 150px; height: 3px; background: #333; margin: 0 auto; position: relative; overflow: hidden; }
-        .loading-bar::after {
-            content: ''; position: absolute; left: -100%; width: 100%; height: 100%;
-            background: #fff; animation: androidProgress 2s infinite linear;
+        @keyframes applePulse {
+            0% { opacity: 0.3; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0.3; transform: scale(0.98); }
         }
-        @keyframes androidProgress { 0% { left: -100%; } 100% { left: 100%; } }
+
+        /* Анімація для Android */
+        .android-load { color: white; text-align: center; }
+        .android-logo { font-size: 2.5rem; font-weight: 500; margin-bottom: 15px; opacity: 0.8; }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid #fff; border-radius: 50%;
+            margin: 0 auto; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* --- ВІКНО ПОВІДОМЛЕННЯ --- */
         #final-screen {
@@ -57,7 +65,7 @@
         }
         .time-main { font-size: 2.2rem; font-weight: 600; }
         .time-seconds {
-            font-size: 4rem; font-weight: 900;
+            font-size: 6rem; font-weight: 900;
             display: inline-block; min-width: 85px;
             animation: fastZoom 1s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -70,7 +78,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body onclick="enableEffects()">
+<body onclick="toggleFullscreen()">
 
     <div id="restart-screen">
         <div id="os-content"></div>
@@ -90,33 +98,12 @@
     </div>
 
     <script>
-        let audioCtx;
-        let effectsEnabled = false;
         let lastSecond = -1;
 
-        // 1. АКТИВАЦІЯ ПОВНОГО ЕКРАНУ ТА ЗВУКУ ПРИ ПЕРШОМУ ТОРКАННІ
-        function enableEffects() {
-            if (effectsEnabled) return;
-            effectsEnabled = true;
-
-            // Повний екран
+        function toggleFullscreen() {
             let elem = document.documentElement;
             if (elem.requestFullscreen) { elem.requestFullscreen(); }
             else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(); }
-
-        }
-
-        // 3. ЗВУК ВІБРАЦІЇ ПРИ ЗАПУСКУ
-        function playBootSound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square'; osc.frequency.setValueAtTime(80, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.4);
-            if ("vibrate" in navigator) navigator.vibrate([200, 100, 200]);
         }
 
         function updateClock() {
@@ -130,9 +117,10 @@
             
             if (s !== lastSecond) {
                 lastSecond = s;
-                document.getElementById('time-s').innerHTML = s_str;
-                playAnnoyingTick();
                 const s_elem = document.getElementById('time-s');
+                s_elem.innerHTML = s_str;
+                
+                // Перезапуск анімації
                 s_elem.style.animation = 'none';
                 s_elem.offsetHeight; 
                 s_elem.style.animation = null;
@@ -147,23 +135,27 @@
                 return;
             }
 
-            // Відразу визначаємо ОС і показуємо лого
             const userAgent = navigator.userAgent || navigator.vendor || window.opera;
             const content = document.getElementById('os-content');
+
             if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                content.innerHTML = '<div class="apple-logo"></div>';
+                // Анімований логотип Apple
+                content.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" class="apple-boot">';
             } else {
-                content.innerHTML = `<div class="android-load"><div class="android-logo">Google</div><div class="loading-bar"></div></div>`;
+                // Анімований Android (Google)
+                content.innerHTML = `
+                    <div class="android-load">
+                        <div class="android-logo">Google</div>
+                        <div class="spinner"></div>
+                    </div>`;
             }
 
-            // Через 4 секунди перемикаємо на годинник
             setTimeout(() => {
-                if (effectsEnabled) playBootSound();
                 document.getElementById('restart-screen').style.display = 'none';
                 document.getElementById('final-screen').style.display = 'flex';
                 document.body.style.backgroundColor = '#3c8ccf';
                 setInterval(updateClock, 100);
-            }, 10000); // 4 секунди завантаження
+            }, 10000); // 4 секунди "завантаження"
         }
 
         window.onload = init;
