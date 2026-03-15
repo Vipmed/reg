@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Перенаправлення...</title>
+</head>
+<body>
+    <div id="message" style="text-align: center; margin-top: 50px; font-family: sans-serif;">
+        Зачекайте, перевіряємо доступ...
+    </div>
+
+    <script>
+        function redirect() {
+            // Отримуємо поточний час пристрою користувача
+            const now = new Date();
+            const hour = now.getHours();
+
+            // НАЛАШТУВАННЯ ЧАСУ:
+            const startHour = 9;  // Початок роботи (9:00)
+            const endHour = 10;   // Кінець роботи (18:00)
+
+            // Посилання на вашу форму реєстрації
+            const formUrl = "https://vipmed.github.io/reg/"; 
+
+            if (hour >= startHour && hour < endHour) {
+                // Якщо час підходить — перенаправляємо
+                window.location.replace(formUrl);
+            } else {
+                // Якщо ні — виводимо повідомлення
+                document.getElementById('message').innerHTML = `
+                    <h2 style="color: red;">Реєстрація зараз закрита</h2>
+                    <p>Форма доступна лише з ${startHour}:00 до ${endHour}:00.</p>
+                `;
+            }
+        }
+
+        // Запускаємо перевірку відразу при завантаженні
+        redirect();
+    </script>
+</body>
+</html>
