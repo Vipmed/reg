@@ -2,40 +2,63 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Перенаправлення...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Перевірка доступу</title>
+    <style>
+        /* Стилі для повного центрування */
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center; /* Центрування по горизонталі */
+            align-items: center;     /* Центрування по вертикалі */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #3c8ccf;
+            color: #333;
+        }
+
+        #message {
+            text-align: center;
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            max-width: 80%;
+        }
+
+        h2 { color: #e74c3c; margin-top: 0; }
+        p { font-size: 1.1rem; line-height: 1.5; }
+    </style>
 </head>
 <body>
-    <div id="message" style="text-align: center; margin-top: 50px; font-family: sans-serif;">
-        Зачекайте, перевіряємо доступ...
+
+    <div id="message">
+        Зачекайте, перевіряємо час доступу...
     </div>
 
     <script>
-        function redirect() {
-            // Отримуємо поточний час пристрою користувача
+        function checkAccess() {
             const now = new Date();
             const hour = now.getHours();
 
-            // НАЛАШТУВАННЯ ЧАСУ:
-            const startHour = 9;  // Початок роботи (9:00)
-            const endHour = 10;   // Кінець роботи (18:00)
-
-            // Посилання на вашу форму реєстрації
-            const formUrl = "https://vipmed.github.io/reg/"; 
+            const startHour = 9;
+            const endHour = 10;
+            const formUrl = "https://vipmed.github.io/reg/";
 
             if (hour >= startHour && hour < endHour) {
-                // Якщо час підходить — перенаправляємо
                 window.location.replace(formUrl);
             } else {
-                // Якщо ні — виводимо повідомлення
+                // Виводимо повідомлення, якщо час не підходить
                 document.getElementById('message').innerHTML = `
-                    <h2 style="color: red;">Реєстрація зараз закрита</h2>
-                    <p>Форма доступна лише з ${startHour}:00 до ${endHour}:00.</p>
+                    <h2>Реєстрація закрита</h2>
+                    <p>Вибачте, але реєстраційна форма доступна лише у робочий час:<br>
+                    <strong>з ${startHour}:00 до ${endHour}:00</strong>.</p>
+                    <p style="font-size: 0.9rem; color: #777;">Зараз на годиннику: ${hour}:${now.getMinutes().toString().padStart(2, '0')}</p>
                 `;
             }
         }
 
-        // Запускаємо перевірку відразу при завантаженні
-        redirect();
+        checkAccess();
     </script>
 </body>
 </html>
