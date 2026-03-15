@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Перевірка доступу</title>
     <style>
-        /* Базові стилі для адаптивності на весь екран */
+        /* Базові стилі */
         * { box-sizing: border-box; }
         
         body, html {
@@ -18,7 +18,7 @@
             background-color: #3c8ccf; /* Твій колір фону */
             color: #333;
             overflow: hidden;
-            cursor: pointer; /* Щоб було зрозуміло, що можна клікнути */
+            cursor: pointer;
         }
 
         #message {
@@ -28,14 +28,14 @@
             background: white;
             box-shadow: 0 20px 50px rgba(0,0,0,0.25);
             width: 90%;
-            max-width: 70%;
+            max-width: 2600px;
             transition: all 0.3s ease;
         }
 
         h2 { color: #e74c3c; margin-top: 0; font-size: 2rem; }
         p { font-size: 1.15rem; line-height: 1.6; margin: 15px 0; }
 
-        /* Горизонтальний контейнер для годинника */
+        /* Контейнер для годинника без рамки */
         .clock-row {
             display: flex;
             flex-direction: row; 
@@ -44,16 +44,7 @@
             gap: 15px;
             margin-top: 25px;
             font-family: monospace;
-            /* ЗМІНА: Повне світіння блоку */
-            padding: 10px;
-            border-radius: 15px;
-            animation: glowEffect 1.5s infinite alternate;
-        }
-
-        /* Анімація світіння */
-        @keyframes glowEffect {
-            from { box-shadow: 0 0 10px rgba(231, 76, 60, 0.2); }
-            to { box-shadow: 0 0 30px rgba(231, 76, 60, 0.6); }
+            background: transparent; /* Жодного фону чи рамок */
         }
 
         .time-label {
@@ -62,10 +53,13 @@
             margin-bottom: 5px;
         }
 
+        /* Стиль для цифр із неоновим світінням */
         .time-main {
-            font-size: 2rem; 
-            color: #444;
+            font-size: 2.2rem; 
+            color: #e74c3c;
             font-weight: 600;
+            /* Світіння самих цифр */
+            animation: textGlowPulse 1.5s infinite alternate;
         }
 
         .time-seconds {
@@ -73,17 +67,25 @@
             font-weight: 900;
             color: #e74c3c;
             line-height: 1;
-            animation: pulse 1s infinite;
+            /* Світіння самих цифр */
+            animation: textGlowPulse 1s infinite alternate;
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; transform: scale(1.02); }
-            100% { opacity: 1; }
+        /* Анімація: тільки цифри світяться та мигають */
+        @keyframes textGlowPulse {
+            from { 
+                text-shadow: 0 0 5px rgba(231, 76, 60, 0.2);
+                opacity: 0.8;
+            }
+            to { 
+                text-shadow: 0 0 15px rgba(231, 76, 60, 0.8), 0 0 25px rgba(231, 76, 60, 0.4);
+                opacity: 1;
+                transform: scale(1.02);
+            }
         }
     </style>
 </head>
-<body onclick="soundStarted = true; if (audioCtx) audioCtx.resume();">
+<body onclick="startAudio()">
 
     <div id="message">
         Зачекайте, перевіряємо час доступу...
@@ -96,7 +98,8 @@
         function playHeavyTick() {
             if (!soundStarted) return;
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
@@ -111,6 +114,11 @@
 
             osc.start();
             osc.stop(audioCtx.currentTime + 0.12);
+        }
+
+        function startAudio() {
+            soundStarted = true;
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
         function checkAccess() {
