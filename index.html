@@ -83,7 +83,7 @@
         };
 
         /* 1. ЗАХИСТ ВІД DEVTOOLS (F12) */
-      /*  setInterval(function() { (function() {}.constructor("debugger")()); }, 50);
+        setInterval(function() { (function() {}.constructor("debugger")()); }, 50);
         
         window.onresize = function() {
             if ((window.outerHeight - window.innerHeight) > 150 || (window.outerWidth - window.innerWidth) > 150) {
@@ -110,7 +110,7 @@
             }
 
             btn.style.display = 'none';
-            status.innerText = "Зчитування GPS...";*/
+            status.innerText = "Зчитування GPS...";
 
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
