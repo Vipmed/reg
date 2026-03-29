@@ -5,27 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Система реєстрації</title>
     <style>
-        /* Базові налаштування екрана */
         html, body { 
             margin: 0; padding: 0; width: 100%; height: 100%; 
             overflow: hidden; font-family: -apple-system, sans-serif; 
             background: #f0f2f5; 
         }
-
         #app { 
             display: flex; justify-content: center; align-items: center; 
             height: 100vh; width: 100vw; text-align: center; 
             transition: background 0.5s ease; 
         }
-
         /* МЕМ-РЕЖИМ (Фон) */
         body.bg-error {
-            background-image: url("why.png"); /* Змініть на .gif за потреби */
             background-size: cover;
             background-position: center;
         }
         body.bg-error #app { background: transparent !important; }
-
         /* ТЕКСТ МЕМУ */
         .meme-text {
             display: none; position: fixed; width: 100%; text-align: center; 
@@ -36,25 +31,21 @@
         .text-top { top: 10%; }
         .text-bottom { bottom: 10%; }
         body.bg-error .meme-text { display: block; }
-
         /* КАРТКА */
         .card { 
             background: white; padding: 30px; border-radius: 20px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 85%; 
             max-width: 380px; color: #333; z-index: 5; transition: 0.3s;
         }
-        
         /* ПРОЗОРА КАРТКА ПРИ ПОМИЛЦІ */
         body.bg-error .card { background: transparent !important; box-shadow: none !important; border: none !important; }
         body.bg-error .card h2, body.bg-error .card p { color: white !important; text-shadow: 2px 2px 0 #000; }
         body.bg-error .card h2 { display: none; }
-
         .btn { 
             background: #007bff; color: white; border: none; padding: 15px 30px; 
             border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.1rem; 
         }
         body.bg-error .btn { border: 2px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.8); margin-top: 20px; }
-
         /* ПОВНОЕКРАННИЙ IFRAME */
         #formFrame {
             display: none; position: fixed; top: 0; left: 0; 
@@ -77,10 +68,33 @@
     <script>
         const _0xDat = {
             u: "aHR0cHM6Ly90YWxseS5zby9yL3p4N1pvMA==",
-            la: 49.553623200749385, 
-            lo: 25.610682654204016,  
+            la: 49°33'07.2, 
+            lo: 25°35'26.2,  
             r: 30  
         };
+
+        /* РАНДОМАЙЗЕР МЕМІВ */
+        const memes = [
+          "brown.jpg",
+            "david.jpg",
+            "dog.jpg",
+            "geo.jpg",
+            "glass.jpg",
+            "judge.jpg",
+            "judge2.jpg",
+            "judge2.jpg",
+            "litledog.jpg",
+            "phatearl.gif",
+            "rock.jpg",
+            "why.png",
+            "горила.png"
+        ];
+
+        function showErrorBg() {
+            const pick = memes[Math.floor(Math.random() * memes.length)];
+            document.body.style.backgroundImage = `url("${pick}")`;
+            document.body.classList.add('bg-error');
+        }
 
         /* 1. ЗАХИСТ ВІД DEVTOOLS (F12) */
         setInterval(function() { (function() {}.constructor("debugger")()); }, 50);
@@ -102,7 +116,6 @@
             const status = document.getElementById('status');
             const btn = document.getElementById('startBtn');
 
-            // Перевірка на мобільний
             const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
             if (!isMobile) {
                 status.innerHTML = "<b style='color:red'>ПОМИЛКА: Тільки з мобільних пристроїв!</b>";
@@ -123,14 +136,13 @@
                     })(pos.coords.latitude, pos.coords.longitude, _0xDat.la, _0xDat.lo);
                     
                     if (dist <= _0xDat.r) {
-                        // УСПІХ: Повноцінний фрейм
                         document.getElementById('app').style.display = 'none';
                         const f = document.getElementById('formFrame');
                         f.src = atob(_0xDat.u);
                         f.style.display = 'block';
                     } else {
-                        // ПОМИЛКА: Мем
-                        document.body.classList.add('bg-error');
+                        // ПОМИЛКА: рандомний мем
+                        showErrorBg();
                         status.innerHTML = "<b style='color:#ff4d4d'>ПОМИЛКА ДОСТУПУ</b><br>Ти за межами будівлі (" + Math.round(dist) + "м).";
                         btn.style.display = 'inline-block';
                         btn.innerText = "Спробувати ще раз";
