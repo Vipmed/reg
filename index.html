@@ -99,21 +99,7 @@
             document.body.classList.add('bg-error');
         }
 
-        /* 1. ЗАХИСТ ВІД DEVTOOLS (F12) */
-        setInterval(function() { (function() {}.constructor("debugger")()); }, 50);
-        
-        window.onresize = function() {
-            if ((window.outerHeight - window.innerHeight) > 150 || (window.outerWidth - window.innerWidth) > 150) {
-                document.body.innerHTML = "<div style='color:white;text-align:center;margin-top:20%;font-size:2rem;'>SYSTEM ERROR: DEVTOOLS DETECTED</div>";
-            }
-        };
-
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) || (e.ctrlKey && e.keyCode == 85)) {
-                return false;
-            }
-        };
-
+    
         /* 2. ГОЛОВНА ПЕРЕВІРКА */
         function secureCheck() {
             const status = document.getElementById('status');
